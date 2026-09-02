@@ -6,6 +6,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.zalmoxis.opaque.Dtos.LoginRequest;
+import org.zalmoxis.opaque.Dtos.LoginResponse;
 import org.zalmoxis.opaque.Dtos.RegisterRequest;
 import org.zalmoxis.opaque.Services.AuthService;
 
@@ -22,5 +24,13 @@ public class AuthController
     {
         authService.registerUser(registerRequest);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<LoginResponse> loginUser(@Valid @RequestBody LoginRequest loginRequest)
+    {
+        String token = authService.login(loginRequest);
+        LoginResponse response = new LoginResponse(token);
+        return ResponseEntity.ok(response);
     }
 }

@@ -1,5 +1,7 @@
 package org.zalmoxis.opaque.Exceptions;
 
+import org.springframework.security.core.AuthenticationException;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -14,4 +16,10 @@ public class GlobalExceptionHandler
     {
         return new ResponseEntity<>(e.getMessage(), HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(AuthenticationException.class)
+public ResponseEntity<String> handleAuthenticationException(AuthenticationException e) {
+    return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
+}
+
 }
