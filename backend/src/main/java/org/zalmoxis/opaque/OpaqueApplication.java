@@ -1,4 +1,4 @@
-package org.example.opaque;
+package org.zalmoxis.opaque;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

@@ -1,4 +1,4 @@
-package org.example.opaque;
+package org.zalmoxis.opaque;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
