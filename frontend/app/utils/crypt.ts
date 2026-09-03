@@ -1,11 +1,11 @@
 import { base64ToUint8Array, uint8ArrayToBase64 } from "./unit8Array&Base64Conversion"
 
-type masterKeyGenType = {
+type login = {
     masterPassword: string
     email: string
 }
 
-export async function masterKeyGen(masterKeyGenRequest: masterKeyGenType): Promise<Uint8Array<ArrayBuffer>> {
+export async function masterKeyGen(masterKeyGenRequest: login): Promise<Uint8Array<ArrayBuffer>> {
     const { masterPassword, email } = masterKeyGenRequest
     const encoder = new TextEncoder()
     const binaryMasterPassword = encoder.encode(masterPassword)
@@ -106,4 +106,28 @@ export async function decryptCreds(masterKey: Uint8Array<ArrayBuffer>, encrypted
     const decryptedString = new TextDecoder().decode(decrypted)
 
     return JSON.parse(decryptedString) as Creds
+}
+
+
+export async function loginVerifierKeyGen(masterKey: Uint8Array<ArrayBuffer>): Promise<string> {
+    const baseKey = await window.crypto.subtle.importKey(
+        "raw",
+        masterKey,
+        "HKDF",
+        false,
+        ["deriveBits"]
+    );
+
+    const loginVerifier = await window.crypto.subtle.deriveBits(
+        {
+            name: "HKDF",
+            hash: "SHA-256",
+            salt: new Uint8Array(),
+            info: new TextEncoder().encode("loginVerifier")
+        },
+        baseKey,
+        256
+    );
+
+    return uint8ArrayToBase64(new Uint8Array(loginVerifier));
 }
