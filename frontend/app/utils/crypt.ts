@@ -1,4 +1,4 @@
-import { uint8ArrayToBase64 } from "./unit8Array&Base64Conversion"
+import { base64ToUint8Array, uint8ArrayToBase64 } from "./unit8Array&Base64Conversion"
 
 type masterKeyGenType = {
     masterPassword: string
@@ -79,4 +79,31 @@ export async function encryptCreds(masterKey: Uint8Array<ArrayBuffer>, cred: Cre
 
 
 
+}
+
+export async function decryptCreds(masterKey: Uint8Array<ArrayBuffer>, encryptedCreds: EncryptedCreds): Promise<Creds> {
+    
+    const iv = new Uint8Array(base64ToUint8Array(encryptedCreds.iv))
+    const ciphertext = new Uint8Array(base64ToUint8Array(encryptedCreds.ciphertext))
+
+    const baseKey = await window.crypto.subtle.importKey(
+        "raw",
+        masterKey,
+        "AES-GCM",
+        false,
+        ["decrypt"]
+    )
+
+    const decrypted = await window.crypto.subtle.decrypt(
+        {
+            name: "AES-GCM",
+            iv: iv
+        },
+        baseKey,
+        ciphertext
+    )
+
+    const decryptedString = new TextDecoder().decode(decrypted)
+
+    return JSON.parse(decryptedString) as Creds
 }
