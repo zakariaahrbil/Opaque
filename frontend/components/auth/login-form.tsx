@@ -4,28 +4,44 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { masterKeyGen, loginVerifierKeyGen } from "@/app/utils/crypt";
+import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
+import { cn } from "@/lib/utils";
 
 export function LoginForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<LoginFormData>({
+    resolver: zodResolver(loginSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+    },
+    mode: "onTouched",
+  });
+
+  const isBusy = loading || isSubmitting;
+
+  async function onSubmit(data: LoginFormData) {
+    setServerError(null);
 
     try {
       setLoading(true);
       setStatus("Deriving keys (600,000 PBKDF2 rounds)...");
 
       const masterKey = await masterKeyGen({
-        masterPassword: password,
-        email: email.trim().toLowerCase(),
+        masterPassword: data.password,
+        email: data.email.trim().toLowerCase(),
       });
 
       setStatus("Computing HKDF-SHA256 login verifier...");
@@ -37,7 +53,7 @@ export function LoginForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email.trim().toLowerCase(),
+          email: data.email.trim().toLowerCase(),
           password: loginVerifier,
         }),
       });
@@ -50,13 +66,13 @@ export function LoginForm() {
         );
       }
 
-      const data = await res.json();
-      if (data.token) sessionStorage.setItem("opaque_jwt", data.token);
+      const resData = await res.json();
+      if (resData.token) sessionStorage.setItem("opaque_jwt", resData.token);
 
       setStatus("Vault unlocked. Redirecting...");
       router.push("/");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      setServerError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setLoading(false);
       setStatus("");
@@ -64,11 +80,11 @@ export function LoginForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {error && (
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+      {serverError && (
         <div className="p-3 rounded border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2">
           <AlertCircle className="size-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
+          <span>{serverError}</span>
         </div>
       )}
 
@@ -76,43 +92,68 @@ export function LoginForm() {
       <div className="space-y-1.5 group">
         <label
           htmlFor="email"
-          className="text-xs font-mono text-muted-foreground group-focus-within:text-primary transition-colors"
+          className={cn(
+            "text-xs font-mono transition-colors",
+            errors.email
+              ? "text-destructive"
+              : "text-muted-foreground group-focus-within:text-primary"
+          )}
         >
           Enter your email *
         </label>
-        <div className="border-b border-border/70 group-focus-within:border-primary transition-colors pb-1">
+        <div
+          className={cn(
+            "border-b pb-1 transition-colors",
+            errors.email
+              ? "border-destructive"
+              : "border-border/70 group-focus-within:border-primary"
+          )}
+        >
           <input
             id="email"
             type="email"
-            required
             autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="user@example.com"
-            disabled={loading}
+            disabled={isBusy}
+            {...register("email")}
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 outline-none font-sans py-1"
           />
         </div>
+        {errors.email && (
+          <p className="text-[11px] font-mono text-destructive pt-0.5">
+            {errors.email.message}
+          </p>
+        )}
       </div>
 
       {/* Password */}
       <div className="space-y-1.5 group">
         <label
           htmlFor="password"
-          className="text-xs font-mono text-muted-foreground group-focus-within:text-primary transition-colors"
+          className={cn(
+            "text-xs font-mono transition-colors",
+            errors.password
+              ? "text-destructive"
+              : "text-muted-foreground group-focus-within:text-primary"
+          )}
         >
           Master password *
         </label>
-        <div className="border-b border-border/70 group-focus-within:border-primary transition-colors pb-1 flex items-center gap-2">
+        <div
+          className={cn(
+            "border-b pb-1 flex items-center gap-2 transition-colors",
+            errors.password
+              ? "border-destructive"
+              : "border-border/70 group-focus-within:border-primary"
+          )}
+        >
           <input
             id="password"
             type={showPassword ? "text" : "password"}
-            required
             autoComplete="current-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••••••••••"
-            disabled={loading}
+            disabled={isBusy}
+            {...register("password")}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 outline-none font-mono py-1 tracking-wider"
           />
           <button
@@ -124,6 +165,11 @@ export function LoginForm() {
             {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
           </button>
         </div>
+        {errors.password && (
+          <p className="text-[11px] font-mono text-destructive pt-0.5">
+            {errors.password.message}
+          </p>
+        )}
       </div>
 
       {/* Crypto status */}
@@ -145,12 +191,12 @@ export function LoginForm() {
 
         <button
           type="submit"
-          disabled={loading}
+          disabled={isBusy}
           className="group inline-flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors disabled:opacity-50 cursor-pointer"
         >
-          <span>{loading ? "Unlocking..." : "Unlock Vault"}</span>
+          <span>{isBusy ? "Unlocking..." : "Unlock Vault"}</span>
           <span className="flex items-center justify-center size-8 rounded bg-foreground text-background group-hover:bg-primary group-hover:text-primary-foreground transition-colors shrink-0">
-            {loading ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowRight className="size-3.5" />}
+            {isBusy ? <Loader2 className="size-3.5 animate-spin" /> : <ArrowRight className="size-3.5" />}
           </span>
         </button>
       </div>

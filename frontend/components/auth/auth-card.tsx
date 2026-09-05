@@ -18,7 +18,7 @@ export function AuthCard({
   return (
     <div className="min-h-screen w-full flex items-center justify-center p-4 sm:p-8 bg-background text-foreground ">
       {/* Card Frame */}
-      <div className="w-full max-w-5xl grid grid-cols-1 md:grid-cols-12 rounded-xl border border-border bg-card overflow-hidden shadow-2xl shadow-primary/5">
+      <div className="w-full max-w-5xl min-h-[80vh] grid grid-cols-1 md:grid-cols-12 rounded-xl border border-border bg-card overflow-hidden shadow-2xl shadow-primary/5">
         {/* Left: Mosaic + Brand */}
         <div className="relative md:col-span-7 flex flex-col justify-between p-8 sm:p-10 overflow-hidden min-h-[280px] md:min-h-[600px] border-b md:border-b-0 md:border-r border-border/60">
           <PixelMosaic />

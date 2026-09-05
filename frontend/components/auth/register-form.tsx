@@ -4,44 +4,47 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { masterKeyGen, loginVerifierKeyGen } from "@/app/utils/crypt";
+import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
+import { cn } from "@/lib/utils";
 
 export function RegisterForm() {
   const router = useRouter();
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [agreed, setAgreed] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
-  const [error, setError] = useState<string | null>(null);
+  const [serverError, setServerError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
 
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    setError(null);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<RegisterFormData>({
+    resolver: zodResolver(registerSchema),
+    defaultValues: {
+      email: "",
+      password: "",
+      confirmPassword: "",
+      agreed: false,
+    },
+    mode: "onTouched",
+  });
 
-    if (password.length < 8) {
-      setError("Master password must be at least 8 characters.");
-      return;
-    }
-    if (password !== confirmPassword) {
-      setError("Passwords do not match.");
-      return;
-    }
-    if (!agreed) {
-      setError("Please acknowledge the zero-knowledge disclaimer.");
-      return;
-    }
+  const isBusy = loading || isSubmitting || success;
+
+  async function onSubmit(data: RegisterFormData) {
+    setServerError(null);
 
     try {
       setLoading(true);
       setStatus("Deriving 256-bit master key (600,000 PBKDF2 rounds)...");
 
       const masterKey = await masterKeyGen({
-        masterPassword: password,
-        email: email.trim().toLowerCase(),
+        masterPassword: data.password,
+        email: data.email.trim().toLowerCase(),
       });
 
       setStatus("Computing HKDF-SHA256 login verifier...");
@@ -53,7 +56,7 @@ export function RegisterForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: email.trim().toLowerCase(),
+          email: data.email.trim().toLowerCase(),
           password: loginVerifier,
         }),
       });
@@ -68,18 +71,18 @@ export function RegisterForm() {
       setStatus("Vault initialized. Redirecting to sign in...");
       setTimeout(() => router.push("/login"), 1500);
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "An unexpected error occurred.");
+      setServerError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
       setLoading(false);
     }
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5">
-      {error && (
+    <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
+      {serverError && (
         <div className="p-3 rounded border border-destructive/30 bg-destructive/10 text-destructive text-xs flex items-start gap-2">
           <AlertCircle className="size-4 shrink-0 mt-0.5" />
-          <span>{error}</span>
+          <span>{serverError}</span>
         </div>
       )}
 
@@ -94,23 +97,38 @@ export function RegisterForm() {
       <div className="space-y-1.5 group">
         <label
           htmlFor="reg-email"
-          className="text-xs font-mono text-muted-foreground group-focus-within:text-primary transition-colors"
+          className={cn(
+            "text-xs font-mono transition-colors",
+            errors.email
+              ? "text-destructive"
+              : "text-muted-foreground group-focus-within:text-primary"
+          )}
         >
           Enter your email *
         </label>
-        <div className="border-b border-border/70 group-focus-within:border-primary transition-colors pb-1">
+        <div
+          className={cn(
+            "border-b pb-1 transition-colors",
+            errors.email
+              ? "border-destructive"
+              : "border-border/70 group-focus-within:border-primary"
+          )}
+        >
           <input
             id="reg-email"
             type="email"
-            required
             autoComplete="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
             placeholder="user@example.com"
-            disabled={loading || success}
+            disabled={isBusy}
+            {...register("email")}
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 outline-none font-sans py-1"
           />
         </div>
+        {errors.email && (
+          <p className="text-[11px] font-mono text-destructive pt-0.5">
+            {errors.email.message}
+          </p>
+        )}
       </div>
 
       {/* Password */}
@@ -118,23 +136,32 @@ export function RegisterForm() {
         <div className="flex items-center justify-between">
           <label
             htmlFor="reg-password"
-            className="text-xs font-mono text-muted-foreground group-focus-within:text-primary transition-colors"
+            className={cn(
+              "text-xs font-mono transition-colors",
+              errors.password
+                ? "text-destructive"
+                : "text-muted-foreground group-focus-within:text-primary"
+            )}
           >
             Create master password *
           </label>
           <span className="text-[10px] font-mono text-muted-foreground/60">min 8 chars</span>
         </div>
-        <div className="border-b border-border/70 group-focus-within:border-primary transition-colors pb-1 flex items-center gap-2">
+        <div
+          className={cn(
+            "border-b pb-1 flex items-center gap-2 transition-colors",
+            errors.password
+              ? "border-destructive"
+              : "border-border/70 group-focus-within:border-primary"
+          )}
+        >
           <input
             id="reg-password"
             type={showPassword ? "text" : "password"}
-            required
-            minLength={8}
             autoComplete="new-password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
             placeholder="••••••••••••••••"
-            disabled={loading || success}
+            disabled={isBusy}
+            {...register("password")}
             className="flex-1 bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 outline-none font-mono py-1 tracking-wider"
           />
           <button
@@ -146,45 +173,70 @@ export function RegisterForm() {
             {showPassword ? <EyeOff className="size-3.5" /> : <Eye className="size-3.5" />}
           </button>
         </div>
+        {errors.password && (
+          <p className="text-[11px] font-mono text-destructive pt-0.5">
+            {errors.password.message}
+          </p>
+        )}
       </div>
 
       {/* Confirm Password */}
       <div className="space-y-1.5 group">
         <label
           htmlFor="reg-confirm"
-          className="text-xs font-mono text-muted-foreground group-focus-within:text-primary transition-colors"
+          className={cn(
+            "text-xs font-mono transition-colors",
+            errors.confirmPassword
+              ? "text-destructive"
+              : "text-muted-foreground group-focus-within:text-primary"
+          )}
         >
           Confirm master password *
         </label>
-        <div className="border-b border-border/70 group-focus-within:border-primary transition-colors pb-1">
+        <div
+          className={cn(
+            "border-b pb-1 transition-colors",
+            errors.confirmPassword
+              ? "border-destructive"
+              : "border-border/70 group-focus-within:border-primary"
+          )}
+        >
           <input
             id="reg-confirm"
             type={showPassword ? "text" : "password"}
-            required
-            minLength={8}
             autoComplete="new-password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
             placeholder="••••••••••••••••"
-            disabled={loading || success}
+            disabled={isBusy}
+            {...register("confirmPassword")}
             className="w-full bg-transparent text-sm text-foreground placeholder:text-muted-foreground/40 outline-none font-mono py-1 tracking-wider"
           />
         </div>
+        {errors.confirmPassword && (
+          <p className="text-[11px] font-mono text-destructive pt-0.5">
+            {errors.confirmPassword.message}
+          </p>
+        )}
       </div>
 
       {/* Disclaimer checkbox */}
-      <div className="flex items-start gap-3 pt-1">
-        <input
-          id="reg-terms"
-          type="checkbox"
-          checked={agreed}
-          onChange={(e) => setAgreed(e.target.checked)}
-          disabled={loading || success}
-          className="mt-0.5 size-3.5 cursor-pointer accent-[#2dd4a7]"
-        />
-        <label htmlFor="reg-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
-          I understand that Opaque is zero-knowledge. If I lose my master password, my vault cannot be recovered by anyone.
-        </label>
+      <div className="space-y-1 pt-1">
+        <div className="flex items-start gap-3">
+          <input
+            id="reg-terms"
+            type="checkbox"
+            disabled={isBusy}
+            {...register("agreed")}
+            className="mt-0.5 size-3.5 cursor-pointer accent-primary"
+          />
+          <label htmlFor="reg-terms" className="text-xs text-muted-foreground leading-relaxed cursor-pointer select-none">
+            I understand that Opaque is zero-knowledge. If I lose my master password, my vault cannot be recovered by anyone.
+          </label>
+        </div>
+        {errors.agreed && (
+          <p className="text-[11px] font-mono text-destructive pl-6.5">
+            {errors.agreed.message}
+          </p>
+        )}
       </div>
 
       {/* Crypto status */}
@@ -206,7 +258,7 @@ export function RegisterForm() {
 
         <button
           type="submit"
-          disabled={loading || success}
+          disabled={isBusy}
           className="group inline-flex items-center gap-3 text-sm font-medium text-foreground hover:text-primary transition-colors disabled:opacity-50 cursor-pointer"
         >
           <span>{loading ? "Generating..." : "Create Vault"}</span>

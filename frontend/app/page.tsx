@@ -9,11 +9,11 @@ export default function Home() {
     <div className="min-h-screen flex flex-col bg-background text-foreground">
       {/* Ambient background glow */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/5 rounded-full blur-[120px] opacity-70" />
+        <div className="absolute -top-40 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-primary/10 rounded-full blur-[100px] opacity-90" />
       </div>
 
       {/* Header */}
-      <header className="relative z-10 w-full border-b border-border/80 bg-background/80 backdrop-blur-md">
+      <header className="fixed z-10 w-full border-b border-border/80 bg-background/60 backdrop-blur-md">
         <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Link
@@ -61,7 +61,7 @@ export default function Home() {
       </header>
 
       {/* Hero */}
-      <main className="relative z-10 flex-1 flex flex-col items-center justify-center px-6 py-16 md:py-24">
+      <main className="relative z-0 flex-1 flex flex-col items-center justify-center px-6 py-24 md:py-36">
         <div className="w-full max-w-3xl mx-auto text-center space-y-7">
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-secondary/60 text-xs font-mono text-muted-foreground">
@@ -102,7 +102,7 @@ export default function Home() {
           </div>
 
           {/* Interactive Crypto Inspector */}
-          <div className="pt-4">
+          <div className="pt-4 ">
             <CryptoPreview />
           </div>
         </div>
