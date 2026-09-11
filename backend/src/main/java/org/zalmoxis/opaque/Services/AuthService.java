@@ -6,16 +6,18 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.zalmoxis.opaque.Dtos.LoginRequest;
-import org.zalmoxis.opaque.Dtos.RegisterRequest;
+import org.zalmoxis.opaque.Dtos.Auth.LoginRequest;
+import org.zalmoxis.opaque.Dtos.Auth.RegisterRequest;
 import org.zalmoxis.opaque.Entities.Role;
 import org.zalmoxis.opaque.Entities.User;
 import org.zalmoxis.opaque.Exceptions.Auth.RegistrationException;
 import org.zalmoxis.opaque.Repositories.UserRepository;
 import org.zalmoxis.opaque.Security.JwtService;
+import org.zalmoxis.opaque.Services.Interfaces.AuthServiceInterface;
 
 @Service
 public class AuthService
+        implements AuthServiceInterface
 {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
