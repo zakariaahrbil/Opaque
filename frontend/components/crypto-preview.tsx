@@ -8,7 +8,7 @@ export function CryptoPreview() {
   const [revealed, setRevealed] = useState(false);
 
   return (
-    <div className="w-full max-w-2xl mx-auto rounded-lg border border-border bg-card shadow-lg shadow-primary/5 overflow-hidden transition-all">
+    <div className="hidden sm:block w-full max-w-2xl mx-auto rounded-lg border border-border bg-card shadow-lg shadow-primary/5 overflow-hidden transition-all">
       {/* Terminal / Panel Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border">
         <div className="flex items-center gap-2">

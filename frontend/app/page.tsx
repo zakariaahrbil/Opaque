@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ArrowRight, Lock, DiameterIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { CryptoPreview } from "@/components/crypto-preview";
+import { HeaderAuthButtons } from "@/components/header-auth-buttons";
 
 export default function Home() {
   return (
@@ -34,7 +35,7 @@ export default function Home() {
             </span>
           </div>
 
-          <nav className="flex items-center gap-3 sm:gap-5">
+          <nav className="flex items-center gap-2 sm:gap-4">
             <Link
               href="https://github.com"
               target="_blank"
@@ -45,17 +46,7 @@ export default function Home() {
               <span className="hidden sm:inline">GitHub</span>
             </Link>
 
-            <Link href="/login">
-              <Button variant="outline" size="sm" className="font-mono text-xs cursor-pointer">
-                Sign In
-              </Button>
-            </Link>
-
-            <Link href="/register">
-              <Button size="sm" className="font-mono text-xs font-semibold cursor-pointer">
-                Create Vault
-              </Button>
-            </Link>
+            <HeaderAuthButtons />
           </nav>
         </div>
       </header>

@@ -7,6 +7,7 @@ import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle, CheckCircle2 } from "luc
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { masterKeyGen, loginVerifierKeyGen } from "@/app/utils/crypt";
+import { registerUser } from "@/lib/api";
 import { registerSchema, type RegisterFormData } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
 
@@ -52,20 +53,10 @@ export function RegisterForm() {
 
       setStatus("Initializing vault on server...");
 
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: data.email.trim().toLowerCase(),
-          password: loginVerifier,
-        }),
+      await registerUser({
+        email: data.email.trim().toLowerCase(),
+        password: loginVerifier,
       });
-
-      if (!res.ok) {
-        throw new Error(
-          (await res.text()) || "Registration failed. An account with this email may already exist."
-        );
-      }
 
       setSuccess(true);
       setStatus("Vault initialized. Redirecting to sign in...");

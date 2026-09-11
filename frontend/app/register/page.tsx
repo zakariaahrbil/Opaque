@@ -7,14 +7,18 @@ export const metadata: Metadata = {
   description: "Create a new zero-knowledge encrypted vault with client-side cryptography.",
 };
 
+import { GuestGuard } from "@/components/auth/auth-guard";
+
 export default function RegisterPage() {
   return (
-    <AuthCard
-      title="Create Vault"
-      subtitle="Enter your details to generate your master key and initialize your zero-knowledge vault."
-      brandTagline="Welcome to Opaque — security by mathematics, privacy by design"
-    >
-      <RegisterForm />
-    </AuthCard>
+    <GuestGuard>
+      <AuthCard
+        title="Create Vault"
+        subtitle="Enter your details to generate your master key and initialize your zero-knowledge vault."
+        brandTagline="Welcome to Opaque — security by mathematics, privacy by design"
+      >
+        <RegisterForm />
+      </AuthCard>
+    </GuestGuard>
   );
 }

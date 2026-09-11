@@ -7,14 +7,18 @@ export const metadata: Metadata = {
   description: "Sign in to decrypt and unlock your zero-knowledge Opaque vault.",
 };
 
+import { GuestGuard } from "@/components/auth/auth-guard";
+
 export default function LoginPage() {
   return (
-    <AuthCard
-      title="Sign-In"
-      subtitle="Enter your email and master password to decrypt your zero-knowledge vault."
-      brandTagline="Welcome to Opaque — your exclusive hub for zero-knowledge security"
-    >
-      <LoginForm />
-    </AuthCard>
+    <GuestGuard>
+      <AuthCard
+        title="Sign-In"
+        subtitle="Enter your email and master password to decrypt your zero-knowledge vault."
+        brandTagline="Welcome to Opaque — your exclusive hub for zero-knowledge security"
+      >
+        <LoginForm />
+      </AuthCard>
+    </GuestGuard>
   );
 }

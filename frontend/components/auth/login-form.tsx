@@ -7,8 +7,10 @@ import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { masterKeyGen, loginVerifierKeyGen } from "@/app/utils/crypt";
+import { loginUser } from "@/lib/api";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
+import { useAuthStore } from "@/lib/store/useAuthStore";
 
 export function LoginForm() {
   const router = useRouter();
@@ -49,25 +51,12 @@ export function LoginForm() {
 
       setStatus("Verifying with vault server...");
 
-      const res = await fetch("/api/auth/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          email: data.email.trim().toLowerCase(),
-          password: loginVerifier,
-        }),
+      const resData = await loginUser({
+        email: data.email.trim().toLowerCase(),
+        password: loginVerifier,
       });
 
-      if (!res.ok) {
-        throw new Error(
-          res.status === 401 || res.status === 403
-            ? "Invalid email or master password."
-            : (await res.text()) || "Login failed. Please verify your credentials."
-        );
-      }
-
-      const resData = await res.json();
-      if (resData.token) sessionStorage.setItem("opaque_jwt", resData.token);
+      useAuthStore.getState().login(resData.token, masterKey, data.email.trim().toLowerCase());
 
       setStatus("Vault unlocked. Redirecting...");
       router.push("/");
