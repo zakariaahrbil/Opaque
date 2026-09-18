@@ -5,7 +5,6 @@ import org.springframework.stereotype.Repository;
 import org.zalmoxis.opaque.Entities.VaultItem;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -14,5 +13,9 @@ public interface VaultItemRepository
 {
     List<VaultItem> findAllByUserId(UUID userId);
 
-    List<VaultItem> findAllByTitle(String title);
+    List<VaultItem> findAllByTitleAndUserId(String title, UUID userId);
+
+
+
+
 }

@@ -6,6 +6,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.zalmoxis.opaque.Entities.User;
 import org.zalmoxis.opaque.Repositories.UserRepository;
+import org.zalmoxis.opaque.Security.UserPrincipal;
 
 @Service
 public class CustomUserDetailsService
@@ -23,11 +24,6 @@ public class CustomUserDetailsService
         User user = userRepository.findByEmail(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + username));
 
-
-        return org.springframework.security.core.userdetails.User.builder()
-                .username(user.getEmail())
-                .password(user.getPassword())
-                .roles(user.getRole().name())
-                .build();
+        return UserPrincipal.fromUser(user);
     }
 }

@@ -1,5 +1,7 @@
 package org.zalmoxis.opaque.Dtos.Vault;
 
+import lombok.Builder;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -12,5 +14,6 @@ public record VaultItemResponse(
         String encryptedData,
         Instant created,
         Instant updated
-) {
+)
+{
 }
