@@ -1,6 +1,6 @@
 import axios, { AxiosError } from "axios";
 import { ApiError, type ApiErrorResponse } from "./types";
-import { clearAuthToken, getAuthToken } from "../isAuth";
+import { clearAuthToken, getAuthToken } from "../auth";
 import { useAuthStore } from "../store/useAuthStore";
 
 const baseURL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080";

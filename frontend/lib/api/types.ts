@@ -32,3 +32,36 @@ export class ApiError extends Error {
     this.data = data;
   }
 }
+
+export type Category = "Social Media" | "Utils" | "Bank" | "Email" | "Documents" | "Others";
+
+export interface VaultItemRequest {
+  title: string,
+  website?: string,
+  category: Category,
+  iv: string  
+  encryptedData: string
+}
+
+export interface VaultItemResponse  {
+  id: string,
+  title: string,
+  website?: string,
+  category: Category,
+  iv: string
+  encryptedData: string,
+  createdAt: string,
+  updatedAt: string,
+}
+
+export type VaultItemBulkResponse = VaultItemResponse []
+
+export interface VaultItemCreateRequest {
+  id?: string
+  title: string,
+  website: string,
+  category: Category
+  username: string
+  password: string
+}
+
