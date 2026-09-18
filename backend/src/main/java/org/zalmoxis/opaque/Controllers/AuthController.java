@@ -6,18 +6,18 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.zalmoxis.opaque.Dtos.LoginRequest;
-import org.zalmoxis.opaque.Dtos.LoginResponse;
-import org.zalmoxis.opaque.Dtos.RegisterRequest;
-import org.zalmoxis.opaque.Services.AuthService;
+import org.zalmoxis.opaque.Dtos.Auth.LoginRequest;
+import org.zalmoxis.opaque.Dtos.Auth.LoginResponse;
+import org.zalmoxis.opaque.Dtos.Auth.RegisterRequest;
+import org.zalmoxis.opaque.Services.Interfaces.AuthServiceInterface;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController
 {
-    private final AuthService authService;
+    private final AuthServiceInterface authService;
 
-    public AuthController(AuthService authService) {this.authService = authService;}
+    public AuthController(AuthServiceInterface authService) {this.authService = authService;}
 
     @PostMapping("/register")
     public ResponseEntity<Void> registerUser(@Valid @RequestBody RegisterRequest registerRequest)

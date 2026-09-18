@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { getAuthToken, setAuthToken, clearAuthToken, decodeJwtPayload, isAuth } from "../isAuth";
+import { getAuthToken, setAuthToken, clearAuthToken, decodeJwtPayload, isAuth } from "../auth";
 
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 

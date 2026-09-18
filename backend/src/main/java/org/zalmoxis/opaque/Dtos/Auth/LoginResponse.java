@@ -1,4 +1,4 @@
-package org.zalmoxis.opaque.Dtos;
+package org.zalmoxis.opaque.Dtos.Auth;
 
 public record LoginResponse(String token)
 {}

@@ -18,8 +18,22 @@ public class GlobalExceptionHandler
     }
 
     @ExceptionHandler(AuthenticationException.class)
-public ResponseEntity<String> handleAuthenticationException(AuthenticationException e) {
-    return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
-}
+    public ResponseEntity<String> handleAuthenticationException(AuthenticationException e) {
+        return new ResponseEntity<>("Invalid email or password", HttpStatus.UNAUTHORIZED);
+    }
 
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(UnauthorizedAccessException.class)
+    public ResponseEntity<String> handleUnauthorizedAccessException(UnauthorizedAccessException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+    }
+
+    @ExceptionHandler(org.springframework.security.access.AccessDeniedException.class)
+    public ResponseEntity<String> handleAccessDeniedException(org.springframework.security.access.AccessDeniedException e) {
+        return new ResponseEntity<>(e.getMessage(), HttpStatus.FORBIDDEN);
+    }
 }

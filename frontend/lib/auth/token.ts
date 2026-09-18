@@ -10,7 +10,6 @@ export interface JwtClaims {
   [key: string]: unknown;
 }
 
-
 export function decodeJwtPayload(token: string): JwtClaims | null {
   try {
     return jwtDecode<JwtClaims>(token);
@@ -19,12 +18,10 @@ export function decodeJwtPayload(token: string): JwtClaims | null {
   }
 }
 
-
 export function getAuthToken(): string | null {
   if (typeof window === "undefined") return null;
   return sessionStorage.getItem(TOKEN_KEY);
 }
-
 
 export function setAuthToken(token: string): void {
   if (typeof window !== "undefined") {
@@ -32,13 +29,11 @@ export function setAuthToken(token: string): void {
   }
 }
 
-
 export function clearAuthToken(): void {
   if (typeof window !== "undefined") {
     sessionStorage.removeItem(TOKEN_KEY);
   }
 }
-
 
 export function isAuth(): boolean {
   const token = getAuthToken();
@@ -54,7 +49,6 @@ export function isAuth(): boolean {
 
   return true;
 }
-
 
 export function getAuthClaims(): JwtClaims | null {
   const token = getAuthToken();
