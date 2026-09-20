@@ -59,7 +59,7 @@ export function LoginForm() {
       useAuthStore.getState().login(resData.token, masterKey, data.email.trim().toLowerCase());
 
       setStatus("Vault unlocked. Redirecting...");
-      router.push("/");
+      router.push("/vault");
     } catch (err: unknown) {
       setServerError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {

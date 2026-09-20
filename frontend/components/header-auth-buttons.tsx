@@ -26,7 +26,7 @@ export function HeaderAuthButtons() {
     return (
       <div className="flex items-center gap-2 sm:gap-3">
         {/* Status Indicator */}
-        <div className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-border bg-secondary/70 text-[11px] font-mono">
+        <Link href="/vault" className="hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded border border-border bg-secondary/70 hover:bg-secondary text-[11px] font-mono transition-colors">
           {isUnlocked ? (
             <>
               <Unlock className="size-3 text-primary" />
@@ -40,7 +40,16 @@ export function HeaderAuthButtons() {
               <span className="text-warning">Vault Locked</span>
             </>
           )}
-        </div>
+        </Link>
+
+        <Link href="/vault">
+          <Button
+            size="sm"
+            className="font-mono text-xs font-semibold cursor-pointer leading-none px-3"
+          >
+            Vault
+          </Button>
+        </Link>
 
         {/* Sign Out Button */}
         <Button
