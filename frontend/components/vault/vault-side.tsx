@@ -3,6 +3,7 @@ import { Category } from "@/lib/api";
 import { Building2, FileText, FolderOpen, KeyRound, Mail, Share2, Shield, Wrench } from "lucide-react";
 import { ComponentType, useState } from "react";
 import { Button } from "../ui/button";
+import { useGetVaultItems } from "@/lib/hooks/useVaultItems";
 
 const CATEGORIES: {
     name: Category | "All";
@@ -53,6 +54,26 @@ const CATEGORIES: {
 export function VaultSide() {
     const [selectedCategory, setSelectedCategory] = useState<Category | "All">("All")
 
+    const { data, isLoading, isError, error } = useGetVaultItems()
+    var counts = {
+        "All": 0,
+        "Social Media": 0,
+        "Bank": 0,
+        "Email": 0,
+        "Utils": 0,
+        "Documents": 0,
+        "Others": 0
+    }
+
+    if(!isLoading){
+      data?.map((item)=>{
+        counts[item.category]++
+      })
+      counts["All"]= data?.length || 0
+      console.log(counts)
+    }
+    
+
     return (
         <aside className="flex flex-col w-full md:w-60 shrink-0 p-3 text-sm max-sm:border-b md:border-r">
             <div className="text-muted-foreground text-[11px] font-mono tracking-wider uppercase px-2 py-1.5">
@@ -61,7 +82,6 @@ export function VaultSide() {
             <nav className="flex flex-col gap-1.5 py-2">
                 {CATEGORIES.map((c) => {
                     const Icon = c.icon
-                    const count = 5
                     const isSelected = selectedCategory === c.name
 
                     return (
@@ -80,8 +100,11 @@ export function VaultSide() {
                                 <Icon className="size-3.5" />
                                 <span >{c.label}</span>
                             </div>
-
-                            <span className="px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground text-[10px] font-mono">{count}</span>
+                            {
+                                !isLoading && (
+                                    <span className="px-1.5 py-0.5 rounded-md bg-secondary text-muted-foreground text-[10px] font-mono">{counts[c.name]}</span>
+                                )
+                            }
                         </Button>
                     )
                 })}

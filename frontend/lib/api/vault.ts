@@ -23,3 +23,10 @@ export async function deleteVaultItem(id:string):Promise<void>{
     )
 }
 
+export async function updateVaultItem(payload:VaultItemRequest,id:string):Promise<void>{
+    await apiClient.put<VaultItemRequest>(
+        `/api/vault/${id}`,
+        payload
+    )
+}
+
