@@ -17,3 +17,5 @@ Thumbs.db
 # Logs
 *.log
 frontend/DESIGN.md
+frontend/components/vault/genTest.ts
+frontend/components/vault/genTest.js
