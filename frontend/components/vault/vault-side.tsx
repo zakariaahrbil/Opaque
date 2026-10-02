@@ -4,6 +4,7 @@ import { Building2, FileText, FolderOpen, KeyRound, Mail, Share2, Shield, Wrench
 import { ComponentType, useState } from "react";
 import { Button } from "../ui/button";
 import { useGetVaultItems } from "@/lib/hooks/useVaultItems";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 const CATEGORIES: {
     name: Category | "All";
@@ -53,6 +54,23 @@ const CATEGORIES: {
 
 export function VaultSide() {
     const [selectedCategory, setSelectedCategory] = useState<Category | "All">("All")
+    const searchParams = useSearchParams()
+    const pathname = usePathname()
+    const router = useRouter()    
+
+    const currentCategory = searchParams.get("category") || "All"
+    console.log(currentCategory)
+
+    function handleSelect(category:Category|"All"){
+        if(currentCategory===category){
+            return
+        }
+        setSelectedCategory(category)
+        const params = new URLSearchParams(searchParams)
+        params.set("category",category)
+        router.push(`${pathname}?${params.toString()}`)
+      
+    }
 
     const { data, isLoading, isError, error } = useGetVaultItems()
     var counts = {
@@ -70,7 +88,7 @@ export function VaultSide() {
         counts[item.category]++
       })
       counts["All"]= data?.length || 0
-      console.log(counts)
+      console.log(data)
     }
     
 
@@ -87,7 +105,7 @@ export function VaultSide() {
                     return (
                         <Button
                             key={c.name}
-                            onClick={() => setSelectedCategory(c.name)}
+                            onClick={() => handleSelect(c.name)}
                             className={`flex items-center justify-between text-xs font-medium transition-colors rounded-md tracking-wider cursor-pointer
                                 ${isSelected ?
                                     "bg-primary/15 text-primary border border-primary/40 hover:bg-primary/20 " :
