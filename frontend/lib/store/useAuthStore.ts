@@ -7,16 +7,16 @@ export interface AuthState {
   status: AuthStatus;
   token: string | null;
   userEmail: string | null;
-  masterKey: Uint8Array | null;
-  
+  masterKey: Uint8Array<ArrayBuffer> | null;
+
   isAuthenticated: () => boolean;
   isVaultUnlocked: () => boolean;
 
   initialize: () => void;
-  login: (token: string, masterKey?: Uint8Array, email?: string) => void;
+  login: (token: string, masterKey?: Uint8Array<ArrayBuffer>, email?: string) => void;
   logout: () => void;
   lockVault: () => void;
-  unlockVault: (masterKey: Uint8Array) => void;
+  unlockVault: (masterKey: Uint8Array<ArrayBuffer>) => void;
 }
 
 export const useAuthStore = create<AuthState>((set, get) => ({
@@ -49,7 +49,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     }
   },
 
-  login: (token: string, masterKey?: Uint8Array, email?: string) => {
+  login: (token: string, masterKey?: Uint8Array<ArrayBuffer>, email?: string) => {
     setAuthToken(token);
     const claims = decodeJwtPayload(token);
     set({
@@ -74,7 +74,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     set({ masterKey: null });
   },
 
-  unlockVault: (masterKey: Uint8Array) => {
+  unlockVault: (masterKey: Uint8Array<ArrayBuffer>) => {
     set({ masterKey });
   },
 }));

@@ -1,6 +1,6 @@
 import { base64ToUint8Array, uint8ArrayToBase64 } from "./unit8Array&Base64Conversion"
 
-type login = {
+export type login = {
     masterPassword: string
     email: string
 }
@@ -11,7 +11,8 @@ export async function masterKeyGen(masterKeyGenRequest: login): Promise<Uint8Arr
     const binaryMasterPassword = encoder.encode(masterPassword)
     const binaryEmail = encoder.encode(email)
 
-    const baseKey = await window.crypto.subtle.importKey(
+
+    const baseKey = await globalThis.crypto.subtle.importKey(
         "raw",
         binaryMasterPassword,
         "PBKDF2",
@@ -19,7 +20,7 @@ export async function masterKeyGen(masterKeyGenRequest: login): Promise<Uint8Arr
         ["deriveBits"]
     )
 
-    const masterKey = await window.crypto.subtle.deriveBits(
+    const masterKey = await globalThis.crypto.subtle.deriveBits(
         {
             name: "PBKDF2",
             hash: "SHA-256",
@@ -34,14 +35,14 @@ export async function masterKeyGen(masterKeyGenRequest: login): Promise<Uint8Arr
 
 }
 
-type Creds = {
+export type Creds = {
     login: string
     password: string
     website: string
     description: string
 }
 
-type EncryptedCreds = {
+export type EncryptedCreds = {
     iv: string,
     ciphertext: string
 }
@@ -51,9 +52,9 @@ export async function encryptCreds(masterKey: Uint8Array<ArrayBuffer>, cred: Cre
 
     const jsonCredsString = JSON.stringify(cred);
 
-    const iv = window.crypto.getRandomValues(new Uint8Array(12))
+    const iv = globalThis.crypto.getRandomValues(new Uint8Array(12))
 
-    const baseKey = await window.crypto.subtle.importKey(
+    const baseKey = await globalThis.crypto.subtle.importKey(
         "raw",
         masterKey,
         "AES-GCM",
@@ -61,7 +62,7 @@ export async function encryptCreds(masterKey: Uint8Array<ArrayBuffer>, cred: Cre
         ["encrypt"]
     )
 
-    const encryptedCreds = await window.crypto.subtle.encrypt(
+    const encryptedCreds = await globalThis.crypto.subtle.encrypt(
         {
             name: "AES-GCM",
             iv: iv
@@ -82,11 +83,11 @@ export async function encryptCreds(masterKey: Uint8Array<ArrayBuffer>, cred: Cre
 }
 
 export async function decryptCreds(masterKey: Uint8Array<ArrayBuffer>, encryptedCreds: EncryptedCreds): Promise<Creds> {
-    
+
     const iv = new Uint8Array(base64ToUint8Array(encryptedCreds.iv))
     const ciphertext = new Uint8Array(base64ToUint8Array(encryptedCreds.ciphertext))
 
-    const baseKey = await window.crypto.subtle.importKey(
+    const baseKey = await globalThis.crypto.subtle.importKey(
         "raw",
         masterKey,
         "AES-GCM",
@@ -94,7 +95,7 @@ export async function decryptCreds(masterKey: Uint8Array<ArrayBuffer>, encrypted
         ["decrypt"]
     )
 
-    const decrypted = await window.crypto.subtle.decrypt(
+    const decrypted = await globalThis.crypto.subtle.decrypt(
         {
             name: "AES-GCM",
             iv: iv
@@ -110,7 +111,7 @@ export async function decryptCreds(masterKey: Uint8Array<ArrayBuffer>, encrypted
 
 
 export async function loginVerifierKeyGen(masterKey: Uint8Array<ArrayBuffer>): Promise<string> {
-    const baseKey = await window.crypto.subtle.importKey(
+    const baseKey = await globalThis.crypto.subtle.importKey(
         "raw",
         masterKey,
         "HKDF",
@@ -118,7 +119,7 @@ export async function loginVerifierKeyGen(masterKey: Uint8Array<ArrayBuffer>): P
         ["deriveBits"]
     );
 
-    const loginVerifier = await window.crypto.subtle.deriveBits(
+    const loginVerifier = await globalThis.crypto.subtle.deriveBits(
         {
             name: "HKDF",
             hash: "SHA-256",

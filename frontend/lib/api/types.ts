@@ -50,8 +50,8 @@ export interface VaultItemResponse  {
   category: Category,
   iv: string
   encryptedData: string,
-  createdAt: string,
-  updatedAt: string,
+  created: string,
+  updated: string,
 }
 
 export type VaultItemBulkResponse = VaultItemResponse []
