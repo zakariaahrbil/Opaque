@@ -38,8 +38,7 @@ export async function masterKeyGen(masterKeyGenRequest: login): Promise<Uint8Arr
 export type Creds = {
     login: string
     password: string
-    website: string
-    description: string
+    description?: string
 }
 
 export type EncryptedCreds = {
