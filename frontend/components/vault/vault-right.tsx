@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
-import {  useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import {
     AlertCircle,
     Check,
@@ -18,80 +18,49 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 import { Button } from "../ui/button";
-import { useGetVaultItems} from "@/lib/hooks/useVaultItems";
-import { decryptCreds, Creds } from "@/app/utils/crypt";
+import { useDeleteVaultItem, useGetVaultItems, useUpdateVaultItem } from "@/lib/hooks/useVaultItems";
+import { useDecryptedItem } from "@/lib/hooks/useDecryptedItem";
 import { useAuthStore } from "@/lib/store/useAuthStore";
+import { VaultItemUpdate } from "@/lib/api";
 
-export function VaultRight() {
+export function VaultRight({ setOpen, setItem }: { setOpen: () => void, setItem: (item: VaultItemUpdate) => void }) {
     const params = useSearchParams();
     const id = params.get("itemId");
 
     const masterKey = useAuthStore((s) => s.masterKey);
     const { data, isLoading } = useGetVaultItems();
+    const { mutateAsync: deleteItem } = useDeleteVaultItem();
 
     const [copiedField, setCopiedField] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
-    const [decryptedCreds, setDecryptedCreds] = useState<Creds | null>(null);
-    const [isDecrypting, setIsDecrypting] = useState(false);
-    const [decryptError, setDecryptError] = useState<string | null>(null);
 
     const vaultItem = useMemo(
         () => data?.find((item) => item.id === id) ?? null,
         [data, id]
     );
 
+    const { creds: decryptedCreds, isLoading: isDecrypting, error: decryptError } = useDecryptedItem(
+        vaultItem,
+        masterKey
+    );
+
     useEffect(() => {
-        let isCancelled = false;
-
         setShowPassword(false);
-        setDecryptError(null);
+    }, [id]);
 
-        if (!vaultItem) {
-            setDecryptedCreds(null);
-            setIsDecrypting(false);
-            return;
-        }
-
-        if (!masterKey) {
-            setDecryptedCreds(null);
-            setIsDecrypting(false);
-            setDecryptError("Vault is locked. Master key is required to decrypt credentials.");
-            return;
-        }
-
-        async function decrypt() {
-            setIsDecrypting(true);
-            setDecryptedCreds(null);
-
-            try {
-                const creds = await decryptCreds(masterKey!, {
-                    iv: vaultItem!.iv,
-                    ciphertext: vaultItem!.encryptedData,
-                });
-
-                if (!isCancelled) {
-                    setDecryptedCreds(creds);
-                    setDecryptError(null);
-                }
-            } catch (err) {
-                if (!isCancelled) {
-                    console.error("Decryption failed:", err);
-                    setDecryptError("Failed to decrypt credentials. The stored data may be corrupted or encrypted with a different key.");
-                    setDecryptedCreds(null);
-                }
-            } finally {
-                if (!isCancelled) {
-                    setIsDecrypting(false);
-                }
-            }
-        }
-
-        decrypt();
-
-        return () => {
-            isCancelled = true;
-        };
-    }, [vaultItem?.id, vaultItem?.iv, vaultItem?.encryptedData, masterKey]);
+    function handleEdit() {
+        if (!vaultItem || !decryptedCreds) return;
+        setItem({
+            id: vaultItem.id,
+            title: vaultItem.title,
+            website: vaultItem.website,
+            category: vaultItem.category,
+            username: decryptedCreds.login,
+            password: decryptedCreds.password,
+            description: decryptedCreds.description,
+        });
+        setOpen();
+    }
 
     function copyToClipboard(text: string | undefined, field: string) {
         if (!text) return;
@@ -202,7 +171,9 @@ export function VaultRight() {
                     <div className="flex items-center gap-2">
                         <Button
                             variant="outline"
-                            className="rounded-md py-2 px-3 text-muted-foreground flex items-center gap-1.5 cursor-pointer text-xs"
+                            onClick={handleEdit}
+                            disabled={!decryptedCreds || isDecrypting}
+                            className="rounded-md py-2 px-3 text-muted-foreground flex items-center gap-1.5 cursor-pointer text-xs disabled:opacity-50"
                         >
                             <Edit3 className="size-3.5" />
                             <span className="font-mono">Edit</span>
@@ -276,8 +247,8 @@ export function VaultRight() {
                                             ? decryptedCreds.password
                                             : "••••••••••••••••••••"
                                         : decryptError
-                                        ? "—"
-                                        : "••••••••••••••••••••"}
+                                            ? "—"
+                                            : "••••••••••••••••••••"}
                                 </span>
                             )}
                             <div className="flex items-center gap-1">

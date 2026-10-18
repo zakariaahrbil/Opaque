@@ -56,12 +56,13 @@ export interface VaultItemResponse  {
 
 export type VaultItemBulkResponse = VaultItemResponse []
 
-export interface VaultItemCreateRequest {
-  id?: string
+export interface VaultItemUpdate {
+  id: string
   title: string,
-  website: string,
-  category: Category
-  username: string
-  password: string
+  website?: string,
+  category: Category,
+  username: string,
+  password: string,
+  description?: string,
 }
 
