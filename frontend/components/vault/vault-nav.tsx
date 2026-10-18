@@ -1,11 +1,14 @@
+'use client'
 import Image from "next/image";
 import Link from "next/link";
 import { Button } from "../ui/button";
 import { Lock, Plus } from "lucide-react";
+import { useAuthStore } from "@/lib/store/useAuthStore";
 
 
 
-export function VaultNav() {
+export function VaultNav({ setOpen }: { setOpen: () => void }) {
+    const { isVaultUnlocked, lockVault } = useAuthStore()
     return (
         <header className="sm:px-6 px-4 h-14 flex items-center justify-between gap-4 bg-card backdrop-blur-md border-b border-border sticky top-0 z-20">
             <div className="flex items-center gap-3">
@@ -22,29 +25,37 @@ export function VaultNav() {
                 <span className="text-xs font-mono font-medium text-muted-foreground sm:block hidden">Coffre Principal</span>
             </div>
             <div className="flex items-center gap-2">
-                <div className="flex items-center gap-2 bg-secondary/50 overflow-hidden border-border px-2.5 py-1.5 rounded-md border">
+                {isVaultUnlocked() ? (<div className="flex items-center gap-2 bg-secondary/50 overflow-hidden border-border px-2.5 py-1.5 rounded-md border">
                     <div className=" text-xs font-mono flex items-center gap-2">
                         <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
                         <span className="text-foreground">Unlocked (ZKP)</span>
                     </div>
-                </div>
+                </div>) :
+                    (<div className="flex items-center gap-2 bg-secondary/50 overflow-hidden border-border px-2.5 py-1.5 rounded-md border">
+                        <div className=" text-xs font-mono flex items-center gap-2">
+                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <span className="text-foreground">Locked</span>
+                        </div>
+                    </div>)}
                 <Button
                     size="sm"
                     className="font-mono text-xs cursor-pointer flex items-center gap-1.5"
+                    onClick={setOpen}
                 >
                     <Plus className="size-3.5" />
                     <span className="sm:block hidden">New Item</span>
                 </Button>
-                <Link href="/">
+                {
+                    isVaultUnlocked() &&
                     <Button
-                        variant="outline"
+                        onClick={lockVault}
                         size="sm"
-                        className="font-mono text-xs cursor-pointer flex items-center gap-1.5 text-muted-foreground hover:text-foreground"
+                        className="font-mono text-xs cursor-pointer flex items-center gap-1.5 text-primary-foreground"
                     >
                         <Lock className="size-3" />
                         <span className="hidden sm:inline">Lock</span>
                     </Button>
-                </Link>
+                }
             </div>
 
         </header>

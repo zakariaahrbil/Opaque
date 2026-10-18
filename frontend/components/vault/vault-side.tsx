@@ -68,8 +68,7 @@ export function VaultSide() {
         setSelectedCategory(category)
         const params = new URLSearchParams(searchParams)
         params.set("category",category)
-        router.push(`${pathname}?${params.toString()}`)
-      
+        router.replace(`${pathname}?${params.toString()}`)
     }
 
     const { data, isLoading, isError, error } = useGetVaultItems()

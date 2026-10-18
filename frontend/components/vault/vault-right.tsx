@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import {  useSearchParams } from "next/navigation";
 import {
     AlertCircle,
     Check,
@@ -12,7 +12,6 @@ import {
     EyeOff,
     Globe,
     Loader2,
-    Lock,
     Shield,
     Trash2,
 } from "lucide-react";
@@ -24,8 +23,6 @@ import { decryptCreds, Creds } from "@/app/utils/crypt";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 
 export function VaultRight() {
-    const router = useRouter();
-    const pathname = usePathname();
     const params = useSearchParams();
     const id = params.get("itemId");
 

@@ -1,5 +1,4 @@
 "use client"
-import { MockVaultItem } from "@/app/vault/page";
 import { VaultItemResponse } from "@/lib/api";
 import { useGetVaultItems } from "@/lib/hooks/useVaultItems";
 import { AlertCircle, FolderOpen, RotateCcw, Search, SearchX } from "lucide-react";
@@ -20,7 +19,7 @@ export function VaultCenter() {
     if (selectedItem) {
       const params = new URLSearchParams(searchParams)
       params.set("itemId", selectedItem.id)
-      router.push(`${pathname}?${params.toString()}`)
+      router.replace(`${pathname}?${params.toString()}`)
     }
   }, [selectedItem])
 
