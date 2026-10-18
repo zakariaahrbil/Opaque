@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import {
     AlertCircle,
     Check,
@@ -18,21 +18,25 @@ import {
 import { formatDistanceToNow } from "date-fns";
 
 import { Button } from "../ui/button";
-import { useDeleteVaultItem, useGetVaultItems, useUpdateVaultItem } from "@/lib/hooks/useVaultItems";
+import { useDeleteVaultItem, useGetVaultItems } from "@/lib/hooks/useVaultItems";
 import { useDecryptedItem } from "@/lib/hooks/useDecryptedItem";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { VaultItemUpdate } from "@/lib/api";
+import { DeleteModal } from "./delete-modal";
 
 export function VaultRight({ setOpen, setItem }: { setOpen: () => void, setItem: (item: VaultItemUpdate) => void }) {
+    const router = useRouter();
+    const pathname = usePathname();
     const params = useSearchParams();
     const id = params.get("itemId");
 
     const masterKey = useAuthStore((s) => s.masterKey);
     const { data, isLoading } = useGetVaultItems();
-    const { mutateAsync: deleteItem } = useDeleteVaultItem();
+    const { mutateAsync: deleteItem, isPending: isDeleting } = useDeleteVaultItem();
 
     const [copiedField, setCopiedField] = useState<string | null>(null);
     const [showPassword, setShowPassword] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
 
     const vaultItem = useMemo(
         () => data?.find((item) => item.id === id) ?? null,
@@ -69,7 +73,13 @@ export function VaultRight({ setOpen, setItem }: { setOpen: () => void, setItem:
         setTimeout(() => setCopiedField(null), 2000);
     }
 
-    function handleDelete() {
+    async function handleConfirmDelete() {
+        if (!vaultItem?.id) return;
+        await deleteItem(vaultItem.id);
+        const newParams = new URLSearchParams(params.toString());
+        newParams.delete("itemId");
+        const query = newParams.toString();
+        router.replace(query ? `${pathname}?${query}` : pathname);
     }
 
     function getFormattedWebsiteUrl(url?: string): string {
@@ -180,14 +190,10 @@ export function VaultRight({ setOpen, setItem }: { setOpen: () => void, setItem:
                         </Button>
                         <Button
                             variant="destructive"
-                            onClick={handleDelete}
+                            onClick={() => setIsDeleteModalOpen(true)}
                             className="rounded-md py-2 px-3 flex items-center gap-1.5 cursor-pointer text-xs"
                         >
-                            {false ? (
-                                <Loader2 className="size-3.5 animate-spin" />
-                            ) : (
-                                <Trash2 className="size-3.5" />
-                            )}
+                            <Trash2 className="size-3.5" />
                             <span className="font-mono">Delete</span>
                         </Button>
                     </div>
@@ -325,6 +331,16 @@ export function VaultRight({ setOpen, setItem }: { setOpen: () => void, setItem:
                     </div>
                 </div>
             </div>
+
+            {vaultItem && (
+                <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    onClose={() => setIsDeleteModalOpen(false)}
+                    onConfirm={handleConfirmDelete}
+                    itemTitle={vaultItem.title}
+                    isDeleting={isDeleting}
+                />
+            )}
         </div>
     );
 }
