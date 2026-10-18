@@ -20,13 +20,14 @@ import {
   Loader2,
 } from "lucide-react";
 import { Button } from "../ui/button";
-import { addVaultItem, Category, VaultItemRequest } from "@/lib/api";
+import {Category, VaultItemRequest, VaultItemUpdate } from "@/lib/api";
 import { useForm } from "react-hook-form";
 import { vaultItemSchema, vaultItemType } from "@/lib/validations/vault";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 import { Creds, encryptCreds } from "@/app/utils/crypt";
+import { useAddVaultItem, useUpdateVaultItem } from "@/lib/hooks/useVaultItems";
 
 const CATEGORIES: { label: Category; icon: typeof Shield }[] = [
   { label: "Social Media", icon: Share2 },
@@ -38,17 +39,9 @@ const CATEGORIES: { label: Category; icon: typeof Shield }[] = [
 ];
 
 interface EditOverlayProps {
-  isOpen?: boolean;
-  onClose?: () => void;
-  initialData?: {
-    id?: string;
-    title?: string;
-    category?: Category;
-    website?: string;
-    username?: string;
-    password?: string;
-    description?: string;
-  };
+  isOpen: boolean;
+  onClose: () => void;
+  initialData?: VaultItemUpdate
 }
 
 export function EditOverlay({
@@ -57,6 +50,8 @@ export function EditOverlay({
   initialData,
 }: EditOverlayProps) {
   const [showPassword, setShowPassword] = useState(false);
+  const { mutateAsync: addVaultItem } = useAddVaultItem()
+  const { mutateAsync: updateVaultItem } = useUpdateVaultItem()
 
   const {
     register,
@@ -98,7 +93,7 @@ export function EditOverlay({
     clearErrors();
     reset();
     setShowPassword(false);
-    onClose?.();
+    onClose();
   }
 
   const selectedCategory = watch("category");
@@ -143,7 +138,31 @@ export function EditOverlay({
         console.error(error);
       }
     } else {
-      // update vault item
+      try {
+        const masterKey = useAuthStore.getState().masterKey;
+        if (!masterKey) {
+          throw new Error("Master key not found");
+        }
+        const creds: Creds = {
+          login: data.username,
+          password: data.password,
+          description: data.description || "",
+        }
+        const encryptedData = await encryptCreds(masterKey, creds);
+        const vaultItemRequest: VaultItemRequest = {
+          title: data.title,
+          website: data.website || "",
+          category: data.category,
+          encryptedData: encryptedData.ciphertext,
+          iv: encryptedData.iv
+        }
+        await updateVaultItem({
+          id: id,
+          item: vaultItemRequest
+        });
+      } catch (error) {
+        console.error(error);
+      }
     }
     handleClose();
   }

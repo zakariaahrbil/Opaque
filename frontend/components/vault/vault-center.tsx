@@ -11,6 +11,8 @@ export function VaultCenter() {
   const [selectedItem, setSelectedItem] = useState<VaultItemResponse | null>(null);
   const { data, isLoading, isError, error, refetch } = useGetVaultItems()
 
+
+
   const searchParams = useSearchParams()
   const router = useRouter()
   const pathname = usePathname()

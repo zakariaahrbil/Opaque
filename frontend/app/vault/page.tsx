@@ -5,24 +5,25 @@ import { VaultCenter } from "@/components/vault/vault-center";
 import { VaultNav } from "@/components/vault/vault-nav";
 import { VaultRight } from "@/components/vault/vault-right";
 import { VaultSide } from "@/components/vault/vault-side";
+import { VaultItemUpdate } from "@/lib/api";
 import { useState } from "react";
 
 
 export default function dash() {
   const [open, setOpen] = useState(false);
-  const [selectedItem, setSelectedItem] = useState();
+  const [selectedItem, setSelectedItem] = useState<VaultItemUpdate>();
 
   return (
     <AuthGuard>
       <div className="max-w-screen min-h-screen flex flex-col">
-        <VaultNav setOpen={() => setOpen(true)} />
+        <VaultNav setOpen={() => { setOpen(true); setSelectedItem(undefined); }} />
         <div className="flex flex-col md:flex-row w-full overflow-hidden flex-1">
           <VaultSide />
           <VaultCenter />
-          <VaultRight />
+          <VaultRight setOpen={() => setOpen(true)} setItem={(item: VaultItemUpdate) => setSelectedItem(item)} />
         </div>
       </div>
-      <EditOverlay isOpen={open} onClose={() => setOpen(false)} />
+      <EditOverlay isOpen={open} onClose={() => setOpen(false)} initialData={selectedItem} />
     </AuthGuard>
   )
 }
