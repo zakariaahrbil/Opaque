@@ -5,7 +5,7 @@ import Link from "next/link";
 import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { masterKeyGen, loginVerifierKeyGen } from "@/app/utils/crypt";
+import { masterKeyGen, loginVerifierKeyGen, unlockingVerifierKeyGen } from "@/app/utils/crypt";
 import { loginUser } from "@/lib/api";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
@@ -54,7 +54,9 @@ export function LoginForm() {
         password: loginVerifier,
       });
 
-      useAuthStore.getState().login(resData.token, masterKey, data.email.trim().toLowerCase());
+      const unlockVerifier = await unlockingVerifierKeyGen(masterKey);
+
+      useAuthStore.getState().login(resData.token, masterKey, unlockVerifier, data.email.trim().toLowerCase());
 
       setStatus("Vault unlocked. Redirecting...");
     } catch (err: unknown) {

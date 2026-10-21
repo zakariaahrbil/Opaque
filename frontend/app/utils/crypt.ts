@@ -131,3 +131,24 @@ export async function loginVerifierKeyGen(masterKey: Uint8Array<ArrayBuffer>): P
 
     return uint8ArrayToBase64(new Uint8Array(loginVerifier));
 }
+
+export async function unlockingVerifierKeyGen(masterKey: Uint8Array<ArrayBuffer>): Promise<string> {
+    const baseKey = await globalThis.crypto.subtle.importKey(
+        "raw",
+        masterKey,
+        "HKDF",
+        false,
+        ["deriveBits"]
+    );
+    const unlockVerifier = await globalThis.crypto.subtle.deriveBits(
+        {
+            name: "HKDF",
+            hash: "SHA-256",
+            salt: new Uint8Array(),
+            info: new TextEncoder().encode("unlockVerifier")
+        },
+        baseKey,
+        256
+    );
+    return uint8ArrayToBase64(new Uint8Array(unlockVerifier));
+}

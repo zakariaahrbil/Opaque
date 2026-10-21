@@ -33,28 +33,30 @@ export function VaultNav({ setOpen }: { setOpen: () => void }) {
                 </div>) :
                     (<div className="flex items-center gap-2 bg-secondary/50 overflow-hidden border-border px-2.5 py-1.5 rounded-md border">
                         <div className=" text-xs font-mono flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
+                            <span className="w-2 h-2 rounded-full bg-amber-500 animate-pulse" />
                             <span className="text-foreground">Locked</span>
                         </div>
                     </div>)}
-                <Button
-                    size="sm"
-                    className="font-mono text-xs cursor-pointer flex items-center gap-1.5"
-                    onClick={setOpen}
-                >
-                    <Plus className="size-3.5" />
-                    <span className="sm:block hidden">New Item</span>
-                </Button>
+
                 {
                     isVaultUnlocked() &&
-                    <Button
-                        onClick={lockVault}
-                        size="sm"
-                        className="font-mono text-xs cursor-pointer flex items-center gap-1.5 text-primary-foreground"
-                    >
-                        <Lock className="size-3" />
-                        <span className="hidden sm:inline">Lock</span>
-                    </Button>
+                    <>
+                        <Button
+                            size="sm"
+                            className="font-mono text-xs cursor-pointer flex items-center gap-1.5"
+                            onClick={setOpen}
+                        >
+                            <Plus className="size-3.5" />
+                            <span className="sm:block hidden">New Item</span>
+                        </Button>
+                        <Button
+                            onClick={lockVault}
+                            size="sm"
+                            className="font-mono text-xs cursor-pointer flex items-center gap-1.5 text-primary-foreground"
+                        >
+                            <Lock className="size-3" />
+                            <span className="hidden sm:inline">Lock</span>
+                        </Button></>
                 }
             </div>
 
