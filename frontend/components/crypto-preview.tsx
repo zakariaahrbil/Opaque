@@ -9,7 +9,6 @@ export function CryptoPreview() {
 
   return (
     <div className="hidden sm:block w-full max-w-2xl mx-auto rounded-lg border border-border bg-card shadow-lg shadow-primary/5 overflow-hidden transition-all">
-      {/* Terminal / Panel Header */}
       <div className="flex items-center justify-between px-4 py-2.5 bg-muted/40 border-b border-border">
         <div className="flex items-center gap-2">
           <div className="flex gap-1.5">
@@ -23,7 +22,7 @@ export function CryptoPreview() {
           </span>
         </div>
 
-        {/* View Switcher Toggle */}
+
         <div className="flex items-center bg-background/80 p-0.5 rounded-md border border-border">
           <button
             type="button"
@@ -50,7 +49,6 @@ export function CryptoPreview() {
         </div>
       </div>
 
-      {/* Panel Body */}
       <div className="p-5 font-mono text-xs space-y-4">
         {view === "client" ? (
           <div className="space-y-3">
@@ -140,7 +138,7 @@ export function CryptoPreview() {
         )}
       </div>
 
-      {/* Interactive Bottom Bar */}
+
       <div className="px-4 py-2 bg-secondary/30 border-t border-border flex items-center justify-between text-[11px] font-mono text-muted-foreground">
         <span className="flex items-center gap-1.5">
           <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />

@@ -59,7 +59,6 @@ export function VaultSide() {
     const router = useRouter()    
 
     const currentCategory = searchParams.get("category") || "All"
-    console.log(currentCategory)
 
     function handleSelect(category:Category|"All"){
         if(currentCategory===category){
@@ -87,7 +86,6 @@ export function VaultSide() {
         counts[item.category]++
       })
       counts["All"]= data?.length || 0
-      console.log(data)
     }
     
 

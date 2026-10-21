@@ -92,7 +92,6 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Interactive Crypto Inspector */}
           <div className="pt-4 ">
             <CryptoPreview />
           </div>
