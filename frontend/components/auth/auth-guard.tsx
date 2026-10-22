@@ -48,7 +48,7 @@ export function GuestGuard({ children }: GuardProps) {
 
   useEffect(() => {
     if (status === "authenticated") {
-      router.replace("/");
+      router.push("/vault");
     }
   }, [status, router]);
 

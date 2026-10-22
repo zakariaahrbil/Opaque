@@ -2,18 +2,16 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { ArrowRight, Eye, EyeOff, Loader2, AlertCircle } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { masterKeyGen, loginVerifierKeyGen } from "@/app/utils/crypt";
+import { masterKeyGen, loginVerifierKeyGen, unlockingVerifierKeyGen } from "@/app/utils/crypt";
 import { loginUser } from "@/lib/api";
 import { loginSchema, type LoginFormData } from "@/lib/validations/auth";
 import { cn } from "@/lib/utils";
 import { useAuthStore } from "@/lib/store/useAuthStore";
 
 export function LoginForm() {
-  const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
@@ -56,10 +54,11 @@ export function LoginForm() {
         password: loginVerifier,
       });
 
-      useAuthStore.getState().login(resData.token, masterKey, data.email.trim().toLowerCase());
+      const unlockVerifier = await unlockingVerifierKeyGen(masterKey);
+
+      useAuthStore.getState().login(resData.token, masterKey, unlockVerifier, data.email.trim().toLowerCase());
 
       setStatus("Vault unlocked. Redirecting...");
-      router.push("/");
     } catch (err: unknown) {
       setServerError(err instanceof Error ? err.message : "An unexpected error occurred.");
     } finally {
@@ -77,7 +76,7 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Email */}
+
       <div className="space-y-1.5 group">
         <label
           htmlFor="email"
@@ -115,7 +114,7 @@ export function LoginForm() {
         )}
       </div>
 
-      {/* Password */}
+
       <div className="space-y-1.5 group">
         <label
           htmlFor="password"
@@ -161,7 +160,7 @@ export function LoginForm() {
         )}
       </div>
 
-      {/* Crypto status */}
+
       {status && (
         <div className="text-[11px] font-mono text-primary flex items-center gap-1.5">
           <Loader2 className="size-3 animate-spin shrink-0" />
@@ -169,7 +168,7 @@ export function LoginForm() {
         </div>
       )}
 
-      {/* Footer row */}
+
       <div className="pt-2 flex items-center justify-between gap-4">
         <Link
           href="/register"

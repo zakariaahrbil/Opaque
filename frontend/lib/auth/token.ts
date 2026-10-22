@@ -55,3 +55,21 @@ export function getAuthClaims(): JwtClaims | null {
   if (!token) return null;
   return decodeJwtPayload(token);
 }
+
+export function setUnlockVerifier(unlockVerifier: string): void {
+  if (typeof window !== "undefined") {
+    sessionStorage.setItem("opaque_unlock_verifier", unlockVerifier);
+  }
+}
+
+export function getUnlockVerifier(): string | null {
+  if (typeof window === "undefined") return null;
+  return sessionStorage.getItem("opaque_unlock_verifier");
+}
+
+export function clearUnlockVerifier(): void {
+  if (typeof window !== "undefined") {
+    sessionStorage.removeItem("opaque_unlock_verifier");
+  }
+}
+
